@@ -27,7 +27,7 @@
           <td>{{edo.productSum}}</td>
           <td>{{edo.productPrice}}</td>
           <td>
-          <a href="" @click="">质检</a>
+          <a href="" @click="this.toQuality(edo)">质检</a>
           <a href="" @click="this.toUpdate(edo.productName)">修改</a>
           </td>
         </tr>
@@ -109,6 +109,25 @@ this.pageInfo=res.data;
     },
     toUpdate:function (productName){
       this.$router.push("/update?productName="+productName)
+    },
+    toQuality: function (edo) {
+      // 数据验证
+      if (!edo || !edo.productName) {
+        alert("产品信息不完整，无法进行质检");
+        return;
+      }
+
+      // 使用encodeURIComponent确保特殊字符正确传递
+      const encodedName = encodeURIComponent(edo.productName);
+
+      // 同时传递ID和名称，增加查询的可靠性
+      this.$router.push({
+        path: "/quality",
+        query: {
+          productName: encodedName,
+          productId: edo.id  // 如果有ID也一并传递
+        }
+      });
     }
   }
 }
