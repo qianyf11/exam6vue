@@ -2,8 +2,8 @@
   <div>
     <div><span>产品名称：</span>
       <input type="text" name="productName" v-model="productName">
-      <button @click="this.queryAllView">查询</button>
-      <button @click="">添加</button>
+      <button @click="this.queryAllView(1)">查询</button>
+      <button @click="this.toAdd">添加</button>
     </div>
     <table>
       <tr>
@@ -23,21 +23,27 @@
           <td>{{edo.productName}}</td>
           <td>{{edo.productDate}}</td>
           <td>{{edo.productDesc}}</td>
-          <td>{{edo.qualities.qualityDesc}}</td>
+          <td>{{edo.qualities?edo.qualities.qualityDesc:"暂无质检"}}</td>
           <td>{{edo.productSum}}</td>
           <td>{{edo.productPrice}}</td>
           <td>
           <a href="" @click="">质检</a>
-          <a href="" @click="">修改</a>
+          <a href="" @click="this.toUpdate(edo.productName)">修改</a>
           </td>
         </tr>
       </template>
     </table>
-    <a href="" @click="">首页</a>
-    <a href="" @click="">上一页</a>
-    <a href="" @click="">下一页</a>
-    <a href="" @click="">末页</a>
-    第？页/共？页
+    <a href="javascript:;" @click="this.queryAllView(1)">首页</a>
+    <a href="javascript:;" @click="this.queryAllView(2)">上一页</a>
+    <a href="javascript:;" @click="this.queryAllView(3)">下一页</a>
+    <a href="javascript:;" @click="this.queryAllView(4)">末页</a>
+    第{{pageInfo.pageNum}}页/共{{pageInfo.pages}}页
+    <select v-model="pageInfo.pageSize" @change="queryAllView(1)">
+      <option value="1">1</option>
+      <option value="5">5</option>
+      <option value="10">10</option>
+    </select>
+    <span>条/页</span>
   </div>
 </template>
 
@@ -47,6 +53,14 @@ import axios from "axios";
 export default {
   data() {
     return {
+      pageInfo:{
+        pageNum:1,
+        pages:"",
+        pageSize:1,
+        prePage:"",
+        nextPage:"",
+
+      },
       edos:[],
       productName:null
     };
@@ -57,20 +71,44 @@ export default {
   computed: {},
 
   mounted() {
-    this.queryAllView()
+    this.queryAllView(1)
   },
 
   methods: {
-    queryAllView: function () {
+    queryAllView: function (i) {
+      var curPage=""
+      switch (i){
+        case 1:
+          curPage=1;
+          break;
+        case 2:
+          curPage=this.pageInfo.prePage
+          break;
+        case 3:
+          curPage=this.pageInfo.nextPage
+          break;
+        case 4:
+          curPage=this.pageInfo.pages
+          break;
+        default:
+
+      }
       axios({
         url: "http://localhost:8081/queryAllView",
         method: "get",
-        params: {productName: this.productName},
+        params: {productName: this.productName,curPage:curPage,pageSize:this.pageInfo.pageSize},
         data: {},
 
       }).then(res => {
-this.edos=res.data;
+this.edos=res.data.list;
+this.pageInfo=res.data;
       })
+    },
+    toAdd:function (){
+      this.$router.push("/add?productName="+this.productName)
+    },
+    toUpdate:function (productName){
+      this.$router.push("/update?productName="+productName)
     }
   }
 }

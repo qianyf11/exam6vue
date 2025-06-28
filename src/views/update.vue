@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>添加产品信息</h1>
+    <h1>修改产品信息</h1>
     <form class="centered-form">
       <div><span>产品名称：</span><input type="text" v-model="deoEntry.productName"></div>
       <div><span>产品描述:</span><textarea v-model="deoEntry.productDesc"></textarea></div>
@@ -9,7 +9,7 @@
       <div><span>生产日期：</span><input type="text" v-model="deoEntry.productDate">yyyy-MM-dd</div>
     </form>
     <div class="button-group">
-      <button @click="this.add">提交</button>
+      <button @click="this.update">提交</button>
       <button @click="this.return">返回</button>
     </div>
   </div>
@@ -21,13 +21,12 @@ import axios from "axios";
 export default {
   data() {
     return {
-      deoEntry:{
-        id:this.$route.query.id,
-        productPrice:"",
-        productDate:"",
-        productSum:"",
-        productName:"",
-        productDesc:"",
+      deoEntry: {
+        productPrice: "",
+        productDate: "",
+        productSum: "",
+        productName: this.$route.query.productName,
+        productDesc: "",
       }
     };
   },
@@ -37,24 +36,37 @@ export default {
   computed: {},
 
   mounted() {
+    this.queryById();
   },
 
   methods: {
-    add: function () {
+    update: function () {
       axios({
-        url: "http://localhost:8081/add",
+        url: "http://localhost:8081/update",
         method: "post",
         params: {},
         data: this.deoEntry,
 
       }).then(res => {
-        if (res.data.code==200){
+        if (res.data.code == 200) {
           this.$router.push("/")
-        }alert(res.data.msg)
+        }
+        alert(res.data.msg)
       })
     },
-    return:function (){
+    return: function () {
       this.$router.push("/")
+    },
+    queryById:function (){
+      axios({
+        url: "http://localhost:8081/queryById",
+        method: "get",
+        params: {productName:this.$route.query.productName},
+        data: {},
+
+      }).then(res => {
+        this.deoEntry = res.data;
+      })
     }
   }
 }
